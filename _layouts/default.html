@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ page.title | default: site.title }} | Exploring Where AI meets Crypto</title>
+  <link rel="icon" href="{{ '/images/favicon.png' | relative_url }}">
+  <meta name="description" content="{{ site.description }}">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ page.title | default: site.title }}">
+  <meta property="og:description" content="{{ site.description }}">
+  <meta property="og:url" content="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
+  <meta property="og:image" content="{{ '/images/magazinepic.png' | relative_url }}">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.title | default: site.title }}">
+  <meta name="twitter:description" content="{{ site.description }}">
+  <meta name="twitter:image" content="{{ '/images/magazinepic.png' | relative_url }}">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "{{ site.title }}",
+    "description": "{{ site.description }}",
+    "url": "{{ site.url }}{{ site.baseurl }}",
+    "logo": "{{ site.url }}{{ site.baseurl }}/images/logohorisontalblack.png",
+    "sameAs": [
+      "https://twitter.com/nearweek",
+      "https://linkedin.com/company/nearweek"
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ '/assets/styles.css' | relative_url }}" />
+
+  <style>
+    :root{
+      --bg: {{ site.data.theme.light.bg }};
+      --text: {{ site.data.theme.light.text }};
+      --muted: {{ site.data.theme.light.muted }};
+      --card: {{ site.data.theme.light.card }};
+      --border: {{ site.data.theme.light.border }};
+      --accent: {{ site.data.theme.light.accent }};
+    }
+    html.dark{
+      --bg: {{ site.data.theme.dark.bg }};
+      --text: {{ site.data.theme.dark.text }};
+      --muted: {{ site.data.theme.dark.muted }};
+      --card: {{ site.data.theme.dark.card }};
+      --border: {{ site.data.theme.dark.border }};
+      --accent: {{ site.data.theme.dark.accent }};
+    }
+</style>
+
+  <script>
+    (function(){
+      try{
+        var saved = localStorage.getItem('nw-theme') || 'light';
+        var root = document.documentElement;
+        if(saved === 'dark') root.classList.add('dark');
+        root.setAttribute('data-theme', saved);
+      }catch(e){}
+    })();
+  </script>
+</head>
+<body>
+  {% include header.html %}
+  <main class="container">
+    {{ content }}
+  </main>
+  {% include footer.html %}
+
+  <script>
+    // Theme toggle
+    (function(){
+      function applyDot(){
+        var on = document.documentElement.classList.contains('dark');
+        var dots = document.querySelectorAll('.dot');
+        dots.forEach(function(d){ d.classList.toggle('on', on); });
+      }
+      function toggleTheme(){
+        var root = document.documentElement;
+        var dark = root.classList.toggle('dark');
+        var mode = dark ? 'dark' : 'light';
+        root.setAttribute('data-theme', mode);
+        try{ localStorage.setItem('nw-theme', mode); }catch(e){}
+        applyDot();
+      }
+      document.addEventListener('DOMContentLoaded', function(){
+        document.getElementById('theme-dot')?.addEventListener('click', toggleTheme);
+        document.getElementById('theme-dot-drawer')?.addEventListener('click', toggleTheme);
+        applyDot();
+      });
+    })();
+
+    // Drawer
+    (function(){
+      document.addEventListener('DOMContentLoaded', function(){
+        var drawer  = document.getElementById('drawer');
+        var burger  = document.getElementById('burger');
+        var closeBtn = document.getElementById('drawer-close');
+        var backdrop = drawer?.querySelector('.drawer-backdrop');
+        var links    = drawer?.querySelectorAll('.drawer-nav a') || [];
+        if (!drawer || !burger || !closeBtn || !backdrop) return;
+
+        function openDrawer(){
+          drawer.setAttribute('aria-hidden','false');
+          burger.setAttribute('aria-expanded','true');
+        }
+        function closeDrawer(){
+          drawer.setAttribute('aria-hidden','true');
+          burger.setAttribute('aria-expanded','false');
+        }
+        burger.addEventListener('click', openDrawer);
+        closeBtn.addEventListener('click', closeDrawer);
+        backdrop.addEventListener('click', closeDrawer);
+        window.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDrawer(); });
+        links.forEach(function(a){ a.addEventListener('click', closeDrawer); });
+      });
+    })();
+
+    // Marquee touch pause/resume
+    (function(){
+      document.addEventListener('DOMContentLoaded', function(){
+        var marquee = document.getElementById('cardsMarquee');
+        if(!marquee) return;
+        var track = marquee.querySelector('.cards-track');
+        if(!track) return;
+        var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+        function pause(){ track.classList.add('paused'); }
+        function resume(){ track.classList.remove('paused'); }
+
+        if(isTouch){
+          marquee.addEventListener('touchstart', pause, {passive:true});
+          marquee.addEventListener('touchend', resume, {passive:true});
+          marquee.addEventListener('touchcancel', resume, {passive:true});
+        }
+        // Also pause when user focuses links via keyboard
+        marquee.addEventListener('focusin', pause);
+        marquee.addEventListener('focusout', resume);
+      });
+    })();
+
+    // Newsletter subscription success handling
+    (function(){
+      document.addEventListener('DOMContentLoaded', function(){
+        // Handle desktop newsletter form
+        const desktopForm = document.getElementById('mc-embedded-subscribe-form');
+        const desktopButton = document.getElementById('mc-embedded-subscribe');
+        
+        // Handle drawer newsletter form
+        const drawerForm = document.getElementById('drawer-mc-embedded-subscribe-form');
+        const drawerButton = document.getElementById('drawer-mc-embedded-subscribe');
+
+        function handleSubscriptionSuccess(button) {
+          // Change button text and add checkmark
+          button.innerHTML = '✓ Subscribed';
+          button.style.background = '#22c55e'; // Green color for success
+          button.disabled = true;
+          
+          // Optional: Reset after 3 seconds
+          setTimeout(() => {
+            button.innerHTML = 'Sign Up';
+            button.style.background = '';
+            button.disabled = false;
+          }, 3000);
+        }
+
+        // Handle form submission
+        if (desktopForm) {
+          desktopForm.addEventListener('submit', function(e) {
+            // Prevent default form submission to handle it with JavaScript
+            e.preventDefault();
+            
+            // Get email value
+            const email = document.getElementById('mce-EMAIL').value;
+            if (email) {
+              // Simulate successful subscription
+              handleSubscriptionSuccess(desktopButton);
+              
+              // You can add actual API call here if needed
+              // For now, we'll just show the success state
+            }
+          });
+        }
+
+        if (drawerForm) {
+          drawerForm.addEventListener('submit', function(e) {
+            // Prevent default form submission to handle it with JavaScript
+            e.preventDefault();
+            
+            // Get email value
+            const email = document.getElementById('drawer-mce-EMAIL').value;
+            if (email) {
+              // Simulate successful subscription
+              handleSubscriptionSuccess(drawerButton);
+              
+              // You can add actual API call here if needed
+              // For now, we'll just show the success state
+            }
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
